@@ -16,6 +16,8 @@ window.RIFT_STRINGS = {
     'st.wait': 'انتظر لحظة وحاول مرة ثانية',
     'st.self': 'هذا رمز جهازك نفسه 🙂',
     'st.codeLen': 'الرمز لازم 6 خانات',
+    'route.direct': 'مباشر ⚡',
+    'route.relay': 'عبر وسيط 🐢',
     'st.fail': 'تعذّر الاتصال — جرّب نفس شبكة الواي فاي',
     'st.busy': 'الجهاز الثاني متصل بجهاز ثاني حاليًا',
     'st.error': 'خطأ: {x}',
@@ -116,6 +118,7 @@ window.RIFT_STRINGS = {
     'toast.savedGallery': 'انحفظ — بيطلع في المعرض ✓',
     'toast.savedDl': 'انحفظ في التنزيلات ✓',
     'toast.saved': 'تم الحفظ ✓ {n} — بتلقاه في التنزيلات والمعرض',
+    'toast.relay': 'الاتصال عبر وسيط بطيء — حط الجهازين على نفس الواي فاي وطفّ الـ VPN',
     'toast.shareNo': 'المشاركة غير مدعومة لهذا الملف — استخدم زر التحميل',
     'drop.overlay': 'أفلت الملفات أو المجلدات لترسلها عبر البوابة',
 
@@ -159,6 +162,8 @@ window.RIFT_STRINGS = {
     'st.wait': 'Hold on a second and try again',
     'st.self': 'That’s this device’s own code 🙂',
     'st.codeLen': 'The code has 6 characters',
+    'route.direct': 'Direct ⚡',
+    'route.relay': 'Via relay 🐢',
     'st.fail': 'Couldn’t connect — try the same Wi-Fi',
     'st.busy': 'The other device is busy with another connection',
     'st.error': 'Error: {x}',
@@ -259,6 +264,7 @@ window.RIFT_STRINGS = {
     'toast.savedGallery': 'Saved — it shows up in your gallery ✓',
     'toast.savedDl': 'Saved to Downloads ✓',
     'toast.saved': 'Saved ✓ {n} — find it in Downloads and your gallery',
+    'toast.relay': 'Connected through a slow relay — put both devices on the same Wi-Fi and turn VPN off',
     'toast.shareNo': 'Sharing isn’t supported for this file — use Download',
     'drop.overlay': 'Drop files or folders to send them through the portal',
 

@@ -373,10 +373,11 @@
     statusState = { key, kind, vars };
     renderStatus();
   }
+  let routeKind = '';
   function renderStatus() {
     ui.status.className = 'status status-' + statusState.kind;
     ui.status.innerHTML = '<span class="status-text"></span>';
-    ui.status.firstChild.textContent = t(statusState.key, statusState.vars);
+    ui.status.firstChild.textContent = t(statusState.key, statusState.vars) + (statusState.key === 'st.connected' && routeKind ? ' · ' + t('route.' + routeKind) : '');
     ui.status.title = ui.status.textContent;
   }
   function idleStatus() {
@@ -534,7 +535,17 @@
   function startPeer(code, attempt = 0, isPersistent = true) {
     myCode = code;
     persistent = isPersistent;
-    peer = new Peer(PREFIX + code, { debug: 1 });
+    peer = new Peer(PREFIX + code, {
+      debug: 1,
+      config: {
+        // خوادم STUN أكثر = فرصة أكبر لاتصال مباشر (سريع). TURN حق PeerJS يبقى احتياطي (بطيء)
+        iceServers: [
+          { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
+          { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'], username: 'peerjs', credential: 'peerjsp' },
+        ],
+        iceCandidatePoolSize: 4,
+      },
+    });
 
     peer.on('open', () => {
       if (isPersistent) store.set(K('rift-id'), code);
@@ -722,7 +733,30 @@
     if (wasOffline) toast(t('toast.back'), 'ok');
     requestWakeLock();
     startHeartbeat(c);
+    routeKind = '';
+    [800, 3500].forEach((ms) => setTimeout(() => detectRoute(c), ms));
     pump();
+  }
+
+  // نوع الاتصال: مباشر (host/srflx) أو عبر وسيط relay (بطيء)
+  async function detectRoute(c) {
+    try {
+      if (conn !== c || !c.peerConnection) return;
+      const stats = await c.peerConnection.getStats();
+      let pair = null;
+      const cands = {};
+      stats.forEach((r) => {
+        if (r.type === 'local-candidate' || r.type === 'remote-candidate') cands[r.id] = r;
+        if (r.type === 'transport' && r.selectedCandidatePairId) pair = stats.get(r.selectedCandidatePairId) || pair;
+      });
+      if (!pair) stats.forEach((r) => { if (r.type === 'candidate-pair' && (r.selected || (r.nominated && r.state === 'succeeded')) && !pair) pair = r; });
+      if (!pair) return;
+      const types = [cands[pair.localCandidateId], cands[pair.remoteCandidateId]].filter(Boolean).map((x) => x.candidateType);
+      const prev = routeKind;
+      routeKind = types.includes('relay') ? 'relay' : 'direct';
+      renderStatus();
+      if (routeKind === 'relay' && prev !== 'relay') toast(t('toast.relay'), 'err');
+    } catch { /* غير مدعوم */ }
   }
 
   // نبضة كل 4 ثواني: إذا الطرف الثاني سكت 15 ثانية نعتبر الاتصال مات ونعيد
