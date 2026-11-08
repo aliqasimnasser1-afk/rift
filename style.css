@@ -323,7 +323,6 @@ h3 { font-size: 1rem; margin: 0; font-weight: 600; }
   display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px;
   background: var(--glass); border: 1px solid var(--line);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  animation: arrive .45s var(--ease) both;
 }
 .dev-ic {
   flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; position: relative;

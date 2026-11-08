@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 80 80" width="220" height="220" role="img" aria-label="RIFT animated logo">
+  <title>RIFT</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset=".5" stop-color="#7b5cff"/>
+      <stop offset="1" stop-color="#ff2bd6"/>
+    </linearGradient>
+    <radialGradient id="core" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".6" stop-color="#cfe9ff"/>
+      <stop offset="1" stop-color="#7b5cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#7b5cff" stop-opacity=".55"/>
+      <stop offset=".55" stop-color="#ff2bd6" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#04040a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <style>
+    .spin  { transform-origin: 32px 32px; animation: spin 2.6s linear infinite; }
+    .spin2 { transform-origin: 32px 32px; animation: spin 3.8s linear infinite reverse; }
+    .orbit { transform-origin: 32px 32px; animation: spin 5s linear infinite; }
+    .slit  { transform-origin: 32px 32px; animation: slit 2.8s ease-in-out infinite; }
+    .core  { transform-origin: 32px 32px; animation: slit 2.8s ease-in-out infinite, flicker 2.8s ease-in-out infinite; }
+    .halo  { transform-origin: 32px 32px; animation: pulse 2.8s ease-in-out infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes slit { 0%, 100% { transform: scale(.45, .92); } 50% { transform: scale(1, 1); } }
+    @keyframes flicker { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: .6; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.05); } }
+  </style>
+
+  <circle class="halo" cx="32" cy="32" r="38" fill="url(#halo)"/>
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#8a8fb3" stroke-opacity=".25" stroke-width="2"/>
+  <g filter="url(#glow)">
+    <circle class="spin" cx="32" cy="32" r="28" fill="none" stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" pathLength="100" stroke-dasharray="36 64"/>
+    <circle class="spin2" cx="32" cy="32" r="21" fill="none" stroke="url(#g)" stroke-width="2" stroke-linecap="round" pathLength="100" stroke-dasharray="20 80" opacity=".85"/>
+    <path class="slit" d="M32 9 C41 22 41 42 32 55 C23 42 23 22 32 9Z" fill="url(#g)"/>
+    <path class="core" d="M32 19 C36 27 36 37 32 45 C28 37 28 27 32 19Z" fill="url(#core)"/>
+    <g class="orbit">
+      <circle cx="32" cy="3.5" r="2.6" fill="#00f0ff"/>
+      <circle cx="32" cy="60.5" r="2.6" fill="#ff2bd6"/>
+    </g>
+  </g>
+</svg>
