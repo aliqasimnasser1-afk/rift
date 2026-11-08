@@ -601,8 +601,11 @@ body.offline .node.peer .node-dot { color: var(--muted); background: transparent
   transition: border-color .2s, box-shadow .2s; min-height: 52px;
 }
 /* زر الإرسال أيقونة */
-.send-btn { width: 54px; padding: 0; display: grid; place-items: center; flex: none; }
-.send-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.send-btn {
+  width: 52px; height: 52px; padding: 0; flex: none; align-self: flex-end; border-radius: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.send-btn svg { width: 24px; height: 24px; flex: none; display: block; }
 [dir="rtl"] .send-btn svg { transform: scaleX(-1); }
 .text-send textarea:focus { border-color: var(--c2); box-shadow: 0 0 0 4px rgba(123, 92, 255, .18); }
 .hint { margin: 10px 2px 0; }
