@@ -673,6 +673,7 @@ body.offline .node.peer .node-dot { color: var(--muted); background: transparent
 .act-btn:hover { background-position: 100% 0; box-shadow: 0 10px 30px -8px rgba(255, 43, 214, .8); }
 .act-btn:active { transform: scale(.92); }
 .act-btn svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.act-btn.done { background: var(--ok); box-shadow: 0 8px 24px -10px rgba(61, 255, 168, .8); }
 .act-btn.ghost {
   color: var(--ink); background: var(--glass-2); box-shadow: inset 0 0 0 1px var(--line-2);
 }

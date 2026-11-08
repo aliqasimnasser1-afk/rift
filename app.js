@@ -195,6 +195,7 @@
   }
   const ACT_ICONS = {
     save: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#07070f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#07070f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
     share: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14.5V3.5M8 7.5l4-4 4 4"/><path d="M8 10.5H6.5A1.5 1.5 0 0 0 5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5H16"/></svg>',
   };
   function iconBtn(kind, label, tag = 'button', extra = '') {
@@ -211,10 +212,16 @@
     const a = iconBtn('save', t('it.download'), 'a');
     a.href = dlUrlOf(f);
     a.download = f.name;
-    if (isAndroid) {
-      const mt = mediaType(f.mime || '', f.name);
-      a.addEventListener('click', () => toast(t(mt === 'image' || mt === 'video' ? 'toast.savedGallery' : 'toast.savedDl'), 'ok'));
-    }
+    // بعد الضغط: الزر يتحول لعلامة ✓ خضراء (يبقى ظاهر حتى لو المتصفح فتح مشغّل ورجعت للصفحة) + رسالة تأكيد
+    a.addEventListener('click', () => {
+      setTimeout(() => {
+        a.classList.add('done');
+        a.innerHTML = ACT_ICONS.check;
+        a.title = t('it.saved');
+        a.setAttribute('aria-label', t('it.saved'));
+        toast(t('toast.saved', { n: f.name }), 'ok');
+      }, 150);
+    });
     container.append(a);
     if (canShareFiles() && f.file) {
       const b = iconBtn('share', t('it.share'), 'button', 'ghost');
@@ -1722,7 +1729,7 @@
   }
 
   async function downloadAll() {
-    if (isAndroid) toast(t('toast.savedGallery'), 'ok');
+    toast(t('toast.saved', { n: received.length + '' }), 'ok');
     for (const f of received) {
       downloadUrl(dlUrlOf(f), f.name);
       await sleep(400);

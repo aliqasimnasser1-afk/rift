@@ -95,6 +95,7 @@ window.RIFT_STRINGS = {
     'it.copied': 'تم ✓',
     'it.download': 'تحميل',
     'it.share': 'مشاركة',
+    'it.saved': 'تم الحفظ ✓',
     'it.cancel': 'إلغاء',
     'u.s': 'ث',
     'u.m': 'د',
@@ -114,6 +115,7 @@ window.RIFT_STRINGS = {
     'toast.copied': 'تم النسخ ✓',
     'toast.savedGallery': 'انحفظ — بيطلع في المعرض ✓',
     'toast.savedDl': 'انحفظ في التنزيلات ✓',
+    'toast.saved': 'تم الحفظ ✓ {n} — بتلقاه في التنزيلات والمعرض',
     'toast.shareNo': 'المشاركة غير مدعومة لهذا الملف — استخدم زر التحميل',
     'drop.overlay': 'أفلت الملفات أو المجلدات لترسلها عبر البوابة',
 
@@ -236,6 +238,7 @@ window.RIFT_STRINGS = {
     'it.copied': 'Copied ✓',
     'it.download': 'Download',
     'it.share': 'Share',
+    'it.saved': 'Saved ✓',
     'it.cancel': 'Cancel',
     'u.s': 's',
     'u.m': 'm',
@@ -255,6 +258,7 @@ window.RIFT_STRINGS = {
     'toast.copied': 'Copied ✓',
     'toast.savedGallery': 'Saved — it shows up in your gallery ✓',
     'toast.savedDl': 'Saved to Downloads ✓',
+    'toast.saved': 'Saved ✓ {n} — find it in Downloads and your gallery',
     'toast.shareNo': 'Sharing isn’t supported for this file — use Download',
     'drop.overlay': 'Drop files or folders to send them through the portal',
 
