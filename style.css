@@ -956,3 +956,10 @@ body.offline .node.peer .node-dot { color: var(--muted); background: transparent
   .intro { display: none !important; }
   body.intro-on .top, body.intro-on main > section, body.intro-on .foot { opacity: 1; }
 }
+
+.set-input {
+  width: 100%; font: inherit; padding: 11px 14px; border-radius: 12px; color: var(--ink);
+  background: var(--glass); border: 1px solid var(--line); outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.set-input:focus { border-color: var(--c2); box-shadow: 0 0 0 4px rgba(123, 92, 255, .18); }
+.set-block small { font-size: .75rem; }

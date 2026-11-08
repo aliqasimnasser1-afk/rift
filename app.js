@@ -166,6 +166,23 @@
     return { name: 'Device', kind: 'desktop' };
   }
   const me = deviceInfo();
+  const baseName = me.name;
+  let modelName = '';
+  // الاسم: اللي تكتبه أنت > موديل الجهاز (أندرويد/Chrome) > النوع العام
+  function applyName() { me.name = String(settings.devName || modelName || baseName).trim().slice(0, 24) || baseName; }
+  applyName();
+  function announceName() {
+    renderNodes();
+    try { if (isOpen()) dc.send(JSON.stringify({ t: 'rename', name: me.name })); } catch { /* تجاهل */ }
+  }
+  try {
+    const uad = navigator.userAgentData;
+    if (uad && uad.getHighEntropyValues) {
+      uad.getHighEntropyValues(['model']).then((v) => {
+        if (v && v.model) { modelName = v.model; applyName(); announceName(); }
+      }).catch(() => {});
+    }
+  } catch { /* غير مدعوم */ }
   const isIOS = me.name === 'iPhone' || me.name === 'iPad';
   const isAndroid = /Android/.test(navigator.userAgent);
 
@@ -264,7 +281,7 @@
     downloadAll: $('downloadAll'), clearLog: $('clearLog'),
     dropOverlay: $('dropOverlay'), toasts: $('toasts'),
     sheet: $('settings'), sheetBackdrop: $('sheetBackdrop'), settingsClose: $('settingsClose'),
-    soundToggle: $('soundToggle'), notifToggle: $('notifToggle'),
+    devName: $('devName'), soundToggle: $('soundToggle'), notifToggle: $('notifToggle'),
     saveInfo: $('saveInfo'), pickFolder: $('pickFolder'), regrantFolder: $('regrantFolder'), unpickFolder: $('unpickFolder'),
     setDevices: $('setDevices'),
     lightbox: $('lightbox'), lbStage: $('lbStage'), lbCount: $('lbCount'), lbName: $('lbName'),
@@ -860,6 +877,17 @@
     switch (m.t) {
       case 'ping':
         break;
+      case 'rename': {
+        const nm = String(m.name || '').slice(0, 24);
+        if (nm && c._rift && c._rift.up) {
+          peerInfo = Object.assign({}, peerInfo, { name: nm });
+          renderNodes();
+          const pid = peerIdOf(c);
+          const d = trusted.find((x) => x.id === pid);
+          if (d) { d.name = nm; saveTrusted(); renderTrusted(); }
+        }
+        break;
+      }
       case 'hello':
         if (!(c._rift && c._rift.up)) establish(c, m);
         break;
@@ -1941,6 +1969,8 @@
     ui.settingsBtn.focus();
   }
   function renderSettings() {
+    ui.devName.value = settings.devName || '';
+    ui.devName.placeholder = modelName || baseName;
     ui.sheet.querySelectorAll('[data-lang]').forEach((b) => b.classList.toggle('on', b.dataset.lang === lang));
     ui.soundToggle.setAttribute('aria-checked', String(!!settings.sound));
     const notifOn = settings.notif && 'Notification' in window && Notification.permission === 'granted';
@@ -2114,6 +2144,13 @@
   ui.sheetBackdrop.addEventListener('click', closeSettings);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !ui.sheet.hidden) closeSettings(); });
   ui.sheet.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => { setLang(b.dataset.lang); renderSettings(); }));
+  ui.devName.addEventListener('change', () => {
+    settings.devName = ui.devName.value.trim().slice(0, 24);
+    saveSettings();
+    applyName();
+    announceName();
+    ui.devName.value = settings.devName;
+  });
   ui.soundToggle.addEventListener('click', () => {
     settings.sound = !settings.sound;
     saveSettings();

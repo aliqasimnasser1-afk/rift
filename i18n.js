@@ -124,6 +124,9 @@ window.RIFT_STRINGS = {
 
     'set.title': 'الإعدادات',
     'set.lang': 'اللغة',
+    'set.devName': 'اسم هذا الجهاز',
+    'set.devNamePh': 'مثال: جوال علي',
+    'set.devNameNote': 'يظهر عند الجهاز الثاني. اتركه فاضي لاسم الجهاز التلقائي',
     'set.sound': 'الصوت',
     'set.notif': 'إشعارات النظام',
     'set.notifNote': 'تنبيه حتى لو الصفحة مخفية',
@@ -270,6 +273,9 @@ window.RIFT_STRINGS = {
 
     'set.title': 'Settings',
     'set.lang': 'Language',
+    'set.devName': 'This device name',
+    'set.devNamePh': 'e.g. Ali’s phone',
+    'set.devNameNote': 'Shown on the other device. Leave empty for the automatic name',
     'set.sound': 'Sound',
     'set.notif': 'System notifications',
     'set.notifNote': 'Alerts even when the page is hidden',
