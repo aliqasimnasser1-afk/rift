@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RIFT — Phone ⇄ PC Portal</title>
+  <meta name="description" content="RIFT: افتح بوابة بين جوالك وكمبيوترك وأرسل الملفات والصور والفيديو والمجلدات مباشرة بدون سيرفر">
+  <meta name="theme-color" content="#04040a">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Readex+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // نطبّق اللغة والاتجاه قبل الرسم عشان ما يرمش
+    (function () {
+      var l = null;
+      try { l = localStorage.getItem('rift-lang'); } catch (e) {}
+      if (l !== 'ar' && l !== 'en') l = 'ar'; // العربي افتراضي، والتبديل من زر EN
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+    })();
+  </script>
+</head>
+<body class="intro-on">
+  <!-- تدرجات مشتركة لكل نسخ اللوقو -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="rift-grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#00f0ff"/>
+        <stop offset=".5" stop-color="#7b5cff"/>
+        <stop offset="1" stop-color="#ff2bd6"/>
+      </linearGradient>
+      <radialGradient id="rift-core" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset=".6" stop-color="#cfe9ff"/>
+        <stop offset="1" stop-color="#7b5cff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <!-- الدخولية -->
+  <div id="intro" class="intro" aria-hidden="true">
+    <div class="intro-tear"></div>
+    <div class="intro-burst" id="introBurst"></div>
+    <div class="intro-center">
+      <svg class="rift-logo intro-logo" viewBox="0 0 64 64">
+        <circle class="lg-track" cx="32" cy="32" r="28"/>
+        <circle class="lg-arc a1" cx="32" cy="32" r="28" pathLength="100"/>
+        <circle class="lg-arc a2" cx="32" cy="32" r="21" pathLength="100"/>
+        <path class="lg-slit" d="M32 9 C41 22 41 42 32 55 C23 42 23 22 32 9Z"/>
+        <path class="lg-core" d="M32 19 C36 27 36 37 32 45 C28 37 28 27 32 19Z"/>
+        <g class="lg-orbit"><circle class="lg-dot c" cx="32" cy="3.5" r="2.6"/><circle class="lg-dot m" cx="32" cy="60.5" r="2.6"/></g>
+      </svg>
+      <div class="intro-word" dir="ltr"><span>R</span><span>I</span><span>F</span><span>T</span></div>
+      <div class="intro-sub" dir="ltr">PHONE <b>⇄</b> PC PORTAL</div>
+    </div>
+    <div class="intro-scan"></div>
+  </div>
+
+  <div class="cosmos" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="./" aria-label="RIFT">
+      <svg class="rift-logo" viewBox="0 0 64 64" aria-hidden="true">
+        <circle class="lg-track" cx="32" cy="32" r="28"/>
+        <circle class="lg-arc a1" cx="32" cy="32" r="28" pathLength="100"/>
+        <circle class="lg-arc a2" cx="32" cy="32" r="21" pathLength="100"/>
+        <path class="lg-slit" d="M32 9 C41 22 41 42 32 55 C23 42 23 22 32 9Z"/>
+        <path class="lg-core" d="M32 19 C36 27 36 37 32 45 C28 37 28 27 32 19Z"/>
+        <g class="lg-orbit"><circle class="lg-dot c" cx="32" cy="3.5" r="2.6"/><circle class="lg-dot m" cx="32" cy="60.5" r="2.6"/></g>
+      </svg>
+      <span class="brand-word">RIFT</span>
+    </a>
+    <div class="top-actions">
+      <div id="status" class="status status-wait" role="status"></div>
+      <button id="langBtn" class="icon-btn lang-btn" type="button" data-i18n-title="a.lang"><span data-i18n="a.langShort"></span></button>
+      <button id="settingsBtn" class="icon-btn" type="button" data-i18n-title="a.settings" data-i18n-aria="a.settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= شاشة الربط ================= -->
+    <section id="pairView" class="pair">
+      <div class="pair-head enter" style="--d:.05s">
+        <p class="eyebrow" dir="ltr">OPEN THE RIFT</p>
+        <h1 data-i18n="pair.title"></h1>
+        <p class="muted lead" data-i18n="pair.lead"></p>
+        <ol class="steps">
+          <li><b>01</b> <span data-i18n="pair.s1"></span></li>
+          <li><b>02</b> <span data-i18n="pair.s2"></span></li>
+          <li><b>03</b> <span data-i18n="pair.s3"></span></li>
+        </ol>
+      </div>
+
+      <div id="trustedBox" class="pair-trusted enter hidden" style="--d:.15s">
+        <div class="sec-head">
+          <h3 data-i18n="trusted.title"></h3>
+          <span class="muted small" data-i18n="trusted.hint"></span>
+        </div>
+        <ul id="trustedList" class="trusted-list"></ul>
+      </div>
+
+      <div class="pair-visual enter" style="--d:.1s">
+        <div class="portal">
+          <div class="portal-glow"></div>
+          <div class="portal-ring"></div>
+          <div class="portal-orbit"></div>
+          <div class="portal-core">
+            <div id="qr" class="qr" data-i18n-aria="pair.qrAria"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pair-code enter" style="--d:.2s">
+        <div class="code-label" data-i18n="pair.code"></div>
+        <div id="myCode" class="code-tiles" dir="ltr" aria-live="polite"></div>
+        <button id="copyLink" class="btn-ghost" type="button" data-i18n="pair.copy"></button>
+
+        <div class="divider"><span data-i18n="pair.or"></span></div>
+
+        <form id="joinForm" class="join">
+          <input id="joinInput" dir="ltr" inputmode="text" autocomplete="off" autocapitalize="characters"
+                 spellcheck="false" maxlength="6" placeholder="••••••" data-i18n-aria="pair.joinAria">
+          <button class="btn" type="submit" data-i18n="pair.join"></button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= شاشة النقل ================= -->
+    <section id="transferView" class="transfer hidden">
+      <div class="session">
+        <div class="link-beam">
+          <div class="node me">
+            <span id="meIcon" class="node-dot"></span>
+            <span id="meName" class="node-name"></span>
+          </div>
+          <div id="beam" class="beam" aria-hidden="true">
+            <span class="beam-line"></span>
+            <i></i><i></i><i></i><i class="rev"></i><i class="rev"></i>
+          </div>
+          <div class="node peer">
+            <span id="peerIcon" class="node-dot"></span>
+            <span id="peerName" class="node-name"></span>
+          </div>
+        </div>
+        <button id="disconnect" class="close-link" type="button" data-i18n="tr.close"></button>
+      </div>
+
+      <div class="send-col">
+        <label id="drop" class="drop" for="fileInput">
+          <span class="drop-icon" aria-hidden="true"></span>
+          <span class="drop-title" data-i18n="tr.dropTitle"></span>
+          <span class="muted small" data-i18n="tr.dropSub"></span>
+          <input id="fileInput" type="file" multiple hidden>
+        </label>
+
+        <div class="quick">
+          <label class="quick-btn touch-only" for="camInput">
+            <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            <span data-i18n="tr.camera"></span>
+            <input id="camInput" type="file" accept="image/*,video/*" capture="environment" hidden>
+          </label>
+          <label class="quick-btn touch-only" for="galleryInput">
+            <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg>
+            <span data-i18n="tr.gallery"></span>
+            <input id="galleryInput" type="file" accept="image/*,video/*" multiple hidden>
+          </label>
+          <label class="quick-btn mouse-only" for="fileInput2">
+            <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+            <span data-i18n="tr.files"></span>
+            <input id="fileInput2" type="file" multiple hidden>
+          </label>
+          <label id="folderBtn" class="quick-btn mouse-only" for="folderInput">
+            <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6M9 13h6"/></svg>
+            <span data-i18n="tr.folder"></span>
+            <input id="folderInput" type="file" webkitdirectory multiple hidden>
+          </label>
+        </div>
+
+        <div class="opts" role="group">
+          <button id="optImg" class="chip" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M8 12l4 4 4-4M12 8v8"/></svg>
+            <span data-i18n="opt.img"></span>
+          </button>
+          <button id="optVid" class="chip" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>
+            <span data-i18n="opt.vid"></span>
+          </button>
+          <button id="optLanes" class="chip" type="button" aria-pressed="true">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M17 4l3 3-3 3"/></svg>
+            <span data-i18n="opt.lanes"></span>
+          </button>
+        </div>
+        <p id="vidNote" class="note muted small hidden" data-i18n="opt.vidNote"></p>
+
+        <form id="textForm" class="text-send">
+          <textarea id="textInput" rows="2" data-i18n-ph="tr.textPh"></textarea>
+          <button class="btn" type="submit" data-i18n="tr.send"></button>
+        </form>
+        <p class="hint muted small" id="hint"></p>
+      </div>
+
+      <div class="log-col">
+        <div class="list-head">
+          <div class="tabs" role="tablist">
+            <button id="tabLog" class="tab active" type="button" role="tab" aria-selected="true"><span class="eyebrow" dir="ltr">LOG</span> <span data-i18n="log.title"></span></button>
+            <button id="tabGal" class="tab" type="button" role="tab" aria-selected="false"><span data-i18n="log.gallery"></span> <b id="galCount" class="count">0</b></button>
+          </div>
+          <div class="list-actions">
+            <button id="downloadAll" class="btn-ghost sm hidden" type="button" data-i18n="log.dlAll"></button>
+            <button id="clearLog" class="btn-ghost sm hidden" type="button" data-i18n="log.clear"></button>
+          </div>
+        </div>
+        <div id="stats" class="stats" dir="ltr"></div>
+
+        <div id="logPane">
+          <ul id="items" class="items"></ul>
+          <p id="empty" class="empty muted" data-i18n="log.empty"></p>
+        </div>
+        <div id="galPane" class="hidden">
+          <div id="galGrid" class="gal-grid"></div>
+          <p id="galEmpty" class="empty muted" data-i18n="gal.empty"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot" dir="ltr">PEER-TO-PEER · NOTHING STORED ON SERVERS · NOTHING UPLOADED</footer>
+
+  <!-- غطاء السحب والإفلات -->
+  <div id="dropOverlay" class="drop-overlay" aria-hidden="true">
+    <div class="drop-overlay-ring"></div>
+    <p data-i18n="drop.overlay"></p>
+  </div>
+
+  <!-- الإعدادات -->
+  <div id="sheetBackdrop" class="sheet-backdrop" hidden></div>
+  <aside id="settings" class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle" hidden>
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="setTitle" data-i18n="set.title"></h2>
+      <button id="settingsClose" class="icon-btn" type="button" data-i18n-aria="set.close">✕</button>
+    </div>
+
+    <div class="set-row">
+      <span data-i18n="set.lang"></span>
+      <div class="seg" role="group">
+        <button type="button" data-lang="ar">العربية</button>
+        <button type="button" data-lang="en">English</button>
+      </div>
+    </div>
+    <div class="set-row">
+      <span data-i18n="set.sound"></span>
+      <button id="soundToggle" class="switch" type="button" role="switch" aria-checked="true"><i></i></button>
+    </div>
+    <div class="set-row">
+      <span><span data-i18n="set.notif"></span><small class="muted" data-i18n="set.notifNote"></small></span>
+      <button id="notifToggle" class="switch" type="button" role="switch" aria-checked="false"><i></i></button>
+    </div>
+    <div class="set-block">
+      <span data-i18n="set.save"></span>
+      <div id="saveInfo" class="save-info muted small"></div>
+      <div class="set-btns">
+        <button id="pickFolder" class="btn-ghost sm hidden" type="button" data-i18n="set.pick"></button>
+        <button id="regrantFolder" class="btn-ghost sm hidden" type="button" data-i18n="set.regrant"></button>
+        <button id="unpickFolder" class="btn-ghost sm danger hidden" type="button" data-i18n="set.unpick"></button>
+      </div>
+    </div>
+    <div class="set-block">
+      <span data-i18n="set.devices"></span>
+      <ul id="setDevices" class="trusted-list compact"></ul>
+    </div>
+  </aside>
+
+  <!-- عارض الصور -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" hidden>
+    <div class="lb-top">
+      <span id="lbCount" class="lb-count" dir="ltr"></span>
+      <span id="lbName" class="lb-name"></span>
+      <a id="lbDownload" class="icon-btn" download data-i18n-title="it.download">
+        <svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+      </a>
+      <button id="lbClose" class="icon-btn" type="button" data-i18n-aria="lb.close">✕</button>
+    </div>
+    <div id="lbStage" class="lb-stage"></div>
+    <button id="lbPrev" class="lb-nav prev" type="button" data-i18n-aria="lb.prev">‹</button>
+    <button id="lbNext" class="lb-nav next" type="button" data-i18n-aria="lb.next">›</button>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

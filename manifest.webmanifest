@@ -1,0 +1,15 @@
+{
+  "name": "RIFT — Phone ⇄ PC Portal",
+  "short_name": "RIFT",
+  "description": "أرسل الملفات والصور والفيديو بين الجوال والكمبيوتر مباشرة",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#04040a",
+  "theme_color": "#04040a",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
