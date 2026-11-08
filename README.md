@@ -30,8 +30,8 @@
     <td width="50%"><img src="assets/screens/desktop-gallery.jpg" alt="معرض الصور المستلمة"></td>
   </tr>
   <tr>
-    <td align="center">الربط بالـ QR والأجهزة الموثوقة</td>
-    <td align="center">معرض الصور المستلمة</td>
+    <td align="center" dir="rtl">الربط بالـ QR والأجهزة الموثوقة</td>
+    <td align="center" dir="rtl">معرض الصور المستلمة</td>
   </tr>
 </table>
 
