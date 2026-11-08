@@ -177,7 +177,18 @@
     a.click();
     a.remove();
   }
-  const asFile = (f) => (f.file instanceof File && f.file.type ? f.file : new File([f.file], f.name, { type: f.mime || (f.file && f.file.type) || '' }));
+  // نوع الملف من الامتداد: المشاركة ترفض الملفات اللي ما لها نوع معروف
+  const MIME_BY_EXT = {
+    mp4: 'video/mp4', m4v: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm', mkv: 'video/x-matroska', '3gp': 'video/3gpp', avi: 'video/x-msvideo',
+    mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', ogg: 'audio/ogg', opus: 'audio/ogg', flac: 'audio/flac', amr: 'audio/amr',
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp', avif: 'image/avif', heic: 'image/heic', heif: 'image/heif', bmp: 'image/bmp',
+    pdf: 'application/pdf', txt: 'text/plain', zip: 'application/zip',
+  };
+  const guessMime = (f) => {
+    const m = /\.([A-Za-z0-9]+)$/.exec(f.name || '');
+    return (f.mime && f.mime !== 'application/octet-stream' && f.mime) || (m && MIME_BY_EXT[m[1].toLowerCase()]) || (f.file && f.file.type) || '';
+  };
+  const asFile = (f) => new File([f.file], f.name, { type: guessMime(f), lastModified: Date.now() });
 
   // رابط تحميل مباشر: نغلّف الملف كـ octet-stream عشان المتصفح يحمّله بدل ما يفتحه في مشغّل الفيديو/الصوت
   // (نفس البيانات بدون نسخ — بس تغيير النوع)
@@ -191,7 +202,10 @@
     if (!f || !f.file) return;
     const file = asFile(f);
     if (!navigator.canShare({ files: [file] })) { toast(t('toast.shareNo'), 'err'); return; }
-    navigator.share({ files: [file] }).catch((e) => { if (e && e.name !== 'AbortError') toast(t('toast.shareNo'), 'err'); });
+    navigator.share({ files: [file] }).catch((e) => {
+      if (e && e.name === 'AbortError') return;
+      toast(t('toast.shareNo'), 'err');
+    });
   }
   const ACT_ICONS = {
     save: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#07070f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/></svg>',
