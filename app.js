@@ -199,7 +199,10 @@
     mp4: 'video/mp4', m4v: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm', mkv: 'video/x-matroska', '3gp': 'video/3gpp', avi: 'video/x-msvideo',
     mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', ogg: 'audio/ogg', opus: 'audio/ogg', flac: 'audio/flac', amr: 'audio/amr',
     jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp', avif: 'image/avif', heic: 'image/heic', heif: 'image/heif', bmp: 'image/bmp',
-    pdf: 'application/pdf', txt: 'text/plain', zip: 'application/zip',
+    svg: 'image/svg+xml', tif: 'image/tiff', tiff: 'image/tiff', ico: 'image/x-icon', jfif: 'image/jpeg', jxl: 'image/jxl',
+    wmv: 'video/x-ms-wmv', flv: 'video/x-flv', mpg: 'video/mpeg', mpeg: 'video/mpeg', ogv: 'video/ogg', ts: 'video/mp2t',
+    wma: 'audio/x-ms-wma', mid: 'audio/midi', weba: 'audio/webm', aiff: 'audio/aiff',
+    pdf: 'application/pdf', txt: 'text/plain', zip: 'application/zip', json: 'application/json', csv: 'text/csv', html: 'text/html',
   };
   const guessMime = (f) => {
     const m = /\.([A-Za-z0-9]+)$/.exec(f.name || '');
@@ -1498,8 +1501,9 @@
     savePartials();
     if (r.sink.store === 'opfs') opfsDone.push(r.sink.fname);
     if (isOpen()) dc.send(JSON.stringify({ t: 'done', id: r.id }));
+    const mime = guessMime({ name: r.name, mime: r.mime, file }) || file.type || '';
+    if (mime && file.type !== mime) file = new File([file], r.name, { type: mime, lastModified: Date.now() });
     const url = objUrl(file);
-    const mime = r.mime || file.type || '';
     Object.assign(r.item.model, { state: 'done', url, file, savedDir: r.sink.store === 'dir', mime, bytes: r.size });
     r.item.update();
     received.push({ url, file, name: r.name, mime });
@@ -1701,6 +1705,17 @@
           el.src = model.url;
           if (type === 'image') { el.alt = ''; el.loading = 'lazy'; el.decoding = 'async'; }
           else { el.muted = true; el.preload = 'metadata'; el.setAttribute('playsinline', ''); }
+          // صيغة المتصفح ما يقدر يعرضها (HEIC, MKV...): نرجع شارة الامتداد، والملف نفسه سليم وينحمّل
+          el.addEventListener('error', () => {
+            thumbDone = false;
+            badge.classList.remove('thumb', 'vid');
+            badge.removeAttribute('role');
+            badge.removeAttribute('tabindex');
+            badge.onclick = null;
+            badge.onkeydown = null;
+            badge.replaceChildren();
+            badge.textContent = extOf(model.name);
+          });
           badge.append(el);
           if (dir === 'in') {
             badge.setAttribute('role', 'button');
@@ -1839,8 +1854,14 @@
     b.setAttribute('aria-label', g.name);
     const el = document.createElement(g.type === 'image' ? 'img' : 'video');
     el.src = g.url;
-    if (g.type === 'image') { el.alt = ''; el.loading = 'lazy'; el.decoding = 'async'; }
+    if (g.type === 'image') { el.alt = ''; el.decoding = 'async'; }
     else { el.muted = true; el.preload = 'metadata'; el.setAttribute('playsinline', ''); }
+    el.addEventListener('error', () => {
+      const i = gallery.indexOf(g);
+      if (i >= 0) gallery.splice(i, 1);
+      b.remove();
+      refreshListActions();
+    });
     b.append(el);
     if (g.type === 'video') { const p = document.createElement('span'); p.className = 'play'; b.append(p); }
     b.onclick = () => openLb(gallery.indexOf(g));
