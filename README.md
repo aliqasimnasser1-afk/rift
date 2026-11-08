@@ -18,29 +18,6 @@
 
 النقل **مباشر** بين الجهازين (WebRTC)، فالملفات ما ترتفع على أي سيرفر. بدون تسجيل وبدون تطبيق، كله من المتصفح، ويشتغل بين جوال وكمبيوتر، أو جوال وجوال.
 
-## صور من الموقع
-
-<p align="center">
-  <img src="assets/screens/desktop-transfer.jpg" alt="شاشة النقل على الكمبيوتر — الملف يطير داخل الشعاع">
-</p>
-
-<table>
-  <tr>
-    <td width="50%"><img src="assets/screens/desktop-pair.jpg" alt="شاشة الربط بالـ QR"></td>
-    <td width="50%"><img src="assets/screens/desktop-gallery.jpg" alt="معرض الصور المستلمة"></td>
-  </tr>
-  <tr>
-    <td align="center" dir="rtl">الربط بالـ QR والأجهزة الموثوقة</td>
-    <td align="center" dir="rtl">معرض الصور المستلمة</td>
-  </tr>
-</table>
-
-<p align="center">
-  <img src="assets/screens/mobile-pair.jpg" width="250" alt="شاشة الربط على الجوال">
-  &nbsp;&nbsp;
-  <img src="assets/screens/mobile-transfer.jpg" width="250" alt="شاشة النقل على الجوال">
-</p>
-
 ## المميزات
 
 | الميزة | التفاصيل |

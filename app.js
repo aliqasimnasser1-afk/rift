@@ -168,7 +168,6 @@
   const me = deviceInfo();
   const isIOS = me.name === 'iPhone' || me.name === 'iPad';
   const isAndroid = /Android/.test(navigator.userAgent);
-  const isMobile = isIOS || isAndroid;
 
   function downloadUrl(url, name) {
     const a = document.createElement('a');
@@ -178,43 +177,50 @@
     a.click();
     a.remove();
   }
-  const asFile = (f) => (f.file instanceof File ? f.file : new File([f.file], f.name, { type: f.mime || (f.file && f.file.type) || '' }));
+  const asFile = (f) => (f.file instanceof File && f.file.type ? f.file : new File([f.file], f.name, { type: f.mime || (f.file && f.file.type) || '' }));
 
-  // حفظ في المعرض: المتصفح ما يقدر يكتب في المعرض مباشرة، فـ
-  // آيفون = قائمة المشاركة («حفظ الفيديو/الصورة» يحفظ في الصور)، أندرويد = تنزيل يطلع في المعرض تلقائيًا
-  function saveMedia(f) {
-    if (!f || !f.url) return;
-    if (isIOS && f.file && navigator.canShare) {
-      const file = asFile(f);
-      if (navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file] }).catch((e) => { if (e && e.name !== 'AbortError') downloadUrl(f.url, f.name); });
-        return;
-      }
-    }
-    downloadUrl(f.url, f.name);
-    if (isAndroid) {
-      const mt = mediaType(f.mime || '', f.name);
-      toast(t(mt === 'image' || mt === 'video' ? 'toast.savedGallery' : 'toast.savedDl'), 'ok');
-    }
+  // رابط تحميل مباشر: نغلّف الملف كـ octet-stream عشان المتصفح يحمّله بدل ما يفتحه في مشغّل الفيديو/الصوت
+  // (نفس البيانات بدون نسخ — بس تغيير النوع)
+  function dlUrlOf(f) {
+    if (!f.dlUrl) f.dlUrl = f.file ? objUrl(new Blob([f.file], { type: 'application/octet-stream' })) : f.url;
+    return f.dlUrl;
+  }
+  const canShareFiles = () => typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
+  // مشاركة: على الآيفون منها «حفظ الفيديو/الصورة» يروح للصور مباشرة
+  function shareFile(f) {
+    if (!f || !f.file) return;
+    const file = asFile(f);
+    if (!navigator.canShare({ files: [file] })) { toast(t('toast.shareNo'), 'err'); return; }
+    navigator.share({ files: [file] }).catch((e) => { if (e && e.name !== 'AbortError') toast(t('toast.shareNo'), 'err'); });
   }
   const ACT_ICONS = {
-    gallery: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M3.5 17.5l5-4.5 3.5 3 3-2.5 5.5 4.5"/></svg>',
-    save: '<svg viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/></svg>',
+    save: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#07070f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/></svg>',
+    share: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14.5V3.5M8 7.5l4-4 4 4"/><path d="M8 10.5H6.5A1.5 1.5 0 0 0 5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5H16"/></svg>',
   };
-  function iconBtn(kind, label, tag = 'button') {
+  function iconBtn(kind, label, tag = 'button', extra = '') {
     const el = document.createElement(tag);
     if (tag === 'button') el.type = 'button';
-    el.className = 'act-btn';
+    el.className = 'act-btn' + (extra ? ' ' + extra : '');
     el.innerHTML = ACT_ICONS[kind];
     el.title = label;
     el.setAttribute('aria-label', label);
     return el;
   }
-  function saveLabel(mime, name) {
-    const mt = mediaType(mime || '', name);
-    if (!isMobile || !mt) return t('it.download');
-    if (mt === 'audio') return t(isIOS ? 'it.saveFiles' : 'it.save');
-    return t('it.saveGallery');
+  // تحميل + مشاركة لأي ملف مستلم
+  function fileActions(f, container) {
+    const a = iconBtn('save', t('it.download'), 'a');
+    a.href = dlUrlOf(f);
+    a.download = f.name;
+    if (isAndroid) {
+      const mt = mediaType(f.mime || '', f.name);
+      a.addEventListener('click', () => toast(t(mt === 'image' || mt === 'video' ? 'toast.savedGallery' : 'toast.savedDl'), 'ok'));
+    }
+    container.append(a);
+    if (canShareFiles() && f.file) {
+      const b = iconBtn('share', t('it.share'), 'button', 'ghost');
+      b.onclick = () => shareFile(f);
+      container.append(b);
+    }
   }
 
   // ================= عناصر الواجهة =================
@@ -241,7 +247,7 @@
     saveInfo: $('saveInfo'), pickFolder: $('pickFolder'), regrantFolder: $('regrantFolder'), unpickFolder: $('unpickFolder'),
     setDevices: $('setDevices'),
     lightbox: $('lightbox'), lbStage: $('lbStage'), lbCount: $('lbCount'), lbName: $('lbName'),
-    lbDownload: $('lbDownload'), lbClose: $('lbClose'), lbPrev: $('lbPrev'), lbNext: $('lbNext'),
+    lbDownload: $('lbDownload'), lbShare: $('lbShare'), lbClose: $('lbClose'), lbPrev: $('lbPrev'), lbNext: $('lbNext'),
   };
 
   // ================= الحالة =================
@@ -1597,20 +1603,7 @@
         x.onclick = () => model.onCancel();
         acts.append(x);
       }
-      if (s === 'done' && dir === 'in' && model.url) {
-        const mt = mediaType(model.mime, model.name);
-        if (isMobile && mt) {
-          // صور وفيديو وصوت على الجوال: أيقونة تحفظ في المعرض
-          const b = iconBtn(mt === 'audio' ? 'save' : 'gallery', saveLabel(model.mime, model.name));
-          b.onclick = () => saveMedia(model);
-          acts.append(b);
-        } else {
-          const a = iconBtn('save', t('it.download'), 'a');
-          a.href = model.url;
-          a.download = model.name;
-          acts.append(a);
-        }
-      }
+      if (s === 'done' && dir === 'in' && model.url) fileActions(model, acts);
 
       // المعاينة: صورة مصغّرة مكان شارة الامتداد، وتنفتح بملء الشاشة بالضغط
       if (s === 'done' && model.url && !previewDone) {
@@ -1729,23 +1722,10 @@
   }
 
   async function downloadAll() {
-    // آيفون: قائمة مشاركة وحدة لكل الملفات («حفظ X عناصر» يوديها للصور مرة وحدة)
-    if (isIOS && navigator.canShare) {
-      const files = received.filter((f) => f.file).map(asFile);
-      if (files.length && navigator.canShare({ files })) {
-        try { await navigator.share({ files }); return; }
-        catch (e) { if (e && e.name === 'AbortError') return; }
-      }
-    }
     if (isAndroid) toast(t('toast.savedGallery'), 'ok');
     for (const f of received) {
-      const a = document.createElement('a');
-      a.href = f.url;
-      a.download = f.name;
-      document.body.append(a);
-      a.click();
-      a.remove();
-      await sleep(350);
+      downloadUrl(dlUrlOf(f), f.name);
+      await sleep(400);
     }
   }
 
@@ -1809,10 +1789,9 @@
     ui.lbStage.replaceChildren(el);
     ui.lbCount.textContent = lbIndex + 1 + ' / ' + gallery.length;
     ui.lbName.textContent = g.name;
-    ui.lbDownload.href = g.url;
+    ui.lbDownload.href = dlUrlOf(g);
     ui.lbDownload.download = g.name;
-    ui.lbDownload.title = saveLabel(g.mime, g.name);
-    ui.lbDownload.setAttribute('aria-label', ui.lbDownload.title);
+    ui.lbShare.hidden = !(canShareFiles() && g.file);
     const multi = gallery.length > 1;
     ui.lbPrev.hidden = !multi;
     ui.lbNext.hidden = !multi;
@@ -2070,11 +2049,7 @@
   ui.tabGal.addEventListener('click', () => selectTab(true));
 
   ui.lbClose.addEventListener('click', closeLb);
-  ui.lbDownload.addEventListener('click', (e) => {
-    if (!isMobile) return; // الكمبيوتر: تنزيل عادي
-    e.preventDefault();
-    saveMedia(gallery[lbIndex]);
-  });
+  ui.lbShare.addEventListener('click', () => shareFile(gallery[lbIndex]));
   ui.lbPrev.addEventListener('click', () => lbGo(-1));
   ui.lbNext.addEventListener('click', () => lbGo(1));
 
