@@ -57,8 +57,10 @@
         <path class="lg-core" d="M32 19 C36 27 36 37 32 45 C28 37 28 27 32 19Z"/>
         <g class="lg-orbit"><circle class="lg-dot c" cx="32" cy="3.5" r="2.6"/><circle class="lg-dot m" cx="32" cy="60.5" r="2.6"/></g>
       </svg>
-      <div class="intro-word" dir="ltr"><span>R</span><span>I</span><span>F</span><span>T</span></div>
-      <div class="intro-sub" dir="ltr">PHONE <b>⇄</b> PC PORTAL</div>
+      <div class="intro-text">
+        <div class="intro-word" dir="ltr"><span>R</span><span>I</span><span>F</span><span>T</span></div>
+        <div class="intro-sub" dir="ltr">PHONE <b>⇄</b> PC PORTAL</div>
+      </div>
     </div>
     <div class="intro-scan"></div>
   </div>
@@ -204,7 +206,9 @@
 
         <form id="textForm" class="text-send">
           <textarea id="textInput" rows="2" data-i18n-ph="tr.textPh"></textarea>
-          <button class="btn" type="submit" data-i18n="tr.send"></button>
+          <button class="btn send-btn" type="submit" data-i18n-title="tr.send" data-i18n-aria="tr.send">
+            <svg viewBox="0 0 24 24"><path d="M21.5 2.5 10.5 13.5"/><path d="M21.5 2.5 14.5 21.5l-4-8-8-4z"/></svg>
+          </button>
         </form>
         <p class="hint muted small" id="hint"></p>
       </div>

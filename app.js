@@ -197,6 +197,19 @@
       toast(t(mt === 'image' || mt === 'video' ? 'toast.savedGallery' : 'toast.savedDl'), 'ok');
     }
   }
+  const ACT_ICONS = {
+    gallery: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M3.5 17.5l5-4.5 3.5 3 3-2.5 5.5 4.5"/></svg>',
+    save: '<svg viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2"/></svg>',
+  };
+  function iconBtn(kind, label, tag = 'button') {
+    const el = document.createElement(tag);
+    if (tag === 'button') el.type = 'button';
+    el.className = 'act-btn';
+    el.innerHTML = ACT_ICONS[kind];
+    el.title = label;
+    el.setAttribute('aria-label', label);
+    return el;
+  }
   function saveLabel(mime, name) {
     const mt = mediaType(mime || '', name);
     if (!isMobile || !mt) return t('it.download');
@@ -294,7 +307,7 @@
     min: sess.get('rift-intro') ? 1300 : 2400,
     done: false,
   };
-  if (sess.get('rift-intro')) ui.intro && ui.intro.classList.add('quick');
+  if (sess.get('rift-intro')) ui.intro && ui.intro.classList.add('intro-fast');
   sess.set('rift-intro', '1');
   (function buildBurst() {
     if (!ui.introBurst) return;
@@ -307,7 +320,7 @@
       p.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(1) + 'vmin');
       p.style.setProperty('--dy', (Math.sin(ang) * dist).toFixed(1) + 'vmin');
       p.style.setProperty('--clr', colors[i % colors.length]);
-      if (!ui.intro.classList.contains('quick')) p.style.setProperty('--dl', (0.55 + Math.random() * 0.15).toFixed(2) + 's');
+      if (!ui.intro.classList.contains('intro-fast')) p.style.setProperty('--dl', (0.55 + Math.random() * 0.15).toFixed(2) + 's');
       frag.append(p);
     }
     ui.introBurst.append(frag);
@@ -1502,6 +1515,7 @@
     let lastRender = 0;
     let lastPct = -1;
     let previewDone = false;
+    let thumbDone = false;
 
     const item = {
       model,
@@ -1520,7 +1534,7 @@
     function render() {
       const s = model.state;
       li.classList.toggle('paused', s === 'paused' || (s === 'queued' && dir === 'out' && model.bytes > 0));
-      badge.textContent = extOf(model.name);
+      if (!thumbDone) badge.textContent = extOf(model.name);
       badge.title = dir === 'in' ? '↓' : '↑';
       nameEl.textContent = model.name;
       nameEl.title = model.name;
@@ -1584,41 +1598,50 @@
         acts.append(x);
       }
       if (s === 'done' && dir === 'in' && model.url) {
-        if (isMobile && mediaType(model.mime, model.name)) {
-          // صور وفيديو وصوت على الجوال: زر يحفظ في المعرض
-          const b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'btn';
-          b.textContent = saveLabel(model.mime, model.name);
+        const mt = mediaType(model.mime, model.name);
+        if (isMobile && mt) {
+          // صور وفيديو وصوت على الجوال: أيقونة تحفظ في المعرض
+          const b = iconBtn(mt === 'audio' ? 'save' : 'gallery', saveLabel(model.mime, model.name));
           b.onclick = () => saveMedia(model);
           acts.append(b);
         } else {
-          const a = document.createElement('a');
-          a.className = 'btn';
+          const a = iconBtn('save', t('it.download'), 'a');
           a.href = model.url;
           a.download = model.name;
-          a.textContent = t('it.download');
           acts.append(a);
         }
       }
 
-      // المعاينة
+      // المعاينة: صورة مصغّرة مكان شارة الامتداد، وتنفتح بملء الشاشة بالضغط
       if (s === 'done' && model.url && !previewDone) {
         previewDone = true;
         const type = mediaType(model.mime, model.name);
-        if (type) {
-          const box = document.createElement('div');
-          box.className = 'preview';
-          const el = document.createElement(type === 'image' ? 'img' : type);
+        if (type === 'image' || type === 'video') {
+          thumbDone = true;
+          badge.textContent = '';
+          badge.classList.add('thumb');
+          if (type === 'video') badge.classList.add('vid');
+          const el = document.createElement(type === 'image' ? 'img' : 'video');
           el.src = model.url;
-          if (type === 'image') { el.alt = model.name; el.loading = 'lazy'; }
-          else { el.controls = true; el.setAttribute('playsinline', ''); el.preload = 'metadata'; }
-          box.append(el);
-          if (dir === 'in' && type === 'image') {
-            box.onclick = () => { const i = gallery.findIndex((g) => g.url === model.url); if (i >= 0) openLb(i); };
-          } else {
-            box.style.cursor = 'default';
+          if (type === 'image') { el.alt = ''; el.loading = 'lazy'; el.decoding = 'async'; }
+          else { el.muted = true; el.preload = 'metadata'; el.setAttribute('playsinline', ''); }
+          badge.append(el);
+          if (dir === 'in') {
+            badge.setAttribute('role', 'button');
+            badge.tabIndex = 0;
+            badge.title = model.name;
+            const open = () => { const i = gallery.findIndex((g) => g.url === model.url); if (i >= 0) openLb(i); };
+            badge.onclick = open;
+            badge.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } };
           }
+        } else if (type === 'audio') {
+          const box = document.createElement('div');
+          box.className = 'preview audio';
+          const el = document.createElement('audio');
+          el.src = model.url;
+          el.controls = true;
+          el.preload = 'metadata';
+          box.append(el);
           li.append(box);
         }
       }
