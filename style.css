@@ -820,9 +820,11 @@ body.offline .node.peer .node-dot { color: var(--muted); background: transparent
   .chip { font-size: .74rem; padding: 5px 10px 5px 8px; }
 }
 
-/* جوال عادي: إخفاء نص الحالة إذا ضاق */
-@media (max-width: 420px) {
+/* جوال عادي: إخفاء نص الحالة إذا ضاق، وأزرار السجل أصغر عشان يبان اسم الملف */
+@media (max-width: 480px) {
   .status { max-width: 40vw; }
+  .item a.btn, .item-acts .btn { padding: 7px 11px; font-size: .78rem; border-radius: 11px; }
+  .item-row { gap: 10px; }
 }
 
 /* تابلت عمودي (≥ 700) */
